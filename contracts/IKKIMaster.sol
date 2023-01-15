@@ -1024,6 +1024,17 @@ contract IKKIInitMintable is ERC20("IKKIToken", "IKKI"), Ownable {
         emit SupplyDistributed(SUPPLY_PER_YEAR.sub(communitySupplyPerYear));
     }
 
+    function updatePerYearEmission() public onlyOwner{
+        require(block.timestamp >= nextDistributionTimestamp, "IKKIInitMintable: Not ready");
+        if (isAfterFirstYear) {
+            SUPPLY_PER_YEAR = SUPPLY_PER_YEAR.div(2);
+        } else {
+            isAfterFirstYear = true;
+        }
+        nextDistributionTimestamp = nextDistributionTimestamp.add(nextDistributionWindow);
+
+    }
+
     function _perYearToPerBlock (
         uint256 perYearValue
     ) internal pure returns (uint256) {
@@ -1418,8 +1429,14 @@ contract IKKIMaster is Ownable {
         emit UpdatedIKKIStakingRatio(_ratio);
     }
 
+     function updatePerYear() public onlyOwner {
+        massUpdatePools();
+        IKKI.updatePerYearEmission();
+        IKKIPerBlock = IKKI.SUPPLY_PER_BLOCK();
+    }
+
     //set the xIKKI contract addres. Can be called only by Owner
     function setxikki(address _xikki) public onlyOwner{
-        xIKKI=_xIKKI;
+        xIKKI=_xikki;
     }
 }
