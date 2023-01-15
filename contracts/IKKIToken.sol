@@ -729,6 +729,17 @@ contract IKKIInitMintable is ERC20("IKKI Token", "IKKI"), Ownable {
         emit SupplyDistributed(SUPPLY_PER_YEAR.sub(communitySupplyPerYear));
     }
 
+    function updatePerYearEmission() public onlyOwner{
+        require(block.timestamp >= nextDistributionTimestamp, "IKKIInitMintable: Not ready");
+        if (isAfterFirstYear) {
+            SUPPLY_PER_YEAR = SUPPLY_PER_YEAR.div(2);
+        } else {
+            isAfterFirstYear = true;
+        }
+        nextDistributionTimestamp = nextDistributionTimestamp.add(nextDistributionWindow);
+
+    }
+
     function _perYearToPerBlock (
         uint256 perYearValue
     ) internal pure returns (uint256) {
